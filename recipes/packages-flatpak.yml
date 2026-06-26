@@ -15,6 +15,7 @@ configurations:
       - org.localsend.localsend_app
       - io.github.Faugus.faugus-launcher
       - net.lutris.Lutris
+      - dev.zed.Zed
       - org.gnome.Loupe
     uninstall:
       - org.mozilla.firefox
