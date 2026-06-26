@@ -52,14 +52,14 @@ jobs:
 
       - name: Pull built image
         run: |
-          podman pull "ghcr.io/mheci/core:latest"
+          sudo podman pull "ghcr.io/mheci/core:latest"
 
       - name: Create bootable disk image
         id: disk-image
         continue-on-error: true
         run: |
           mkdir -p /tmp/bootc-output
-          podman run --rm --privileged \
+          sudo podman run --rm --privileged \
             -v /var/lib/containers/storage:/var/lib/containers/storage \
             -v /tmp/bootc-output:/output \
             quay.io/centos-bootc/bootc-image-builder:latest \
