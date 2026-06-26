@@ -1,43 +1,59 @@
 # core &nbsp; [![bluebuild build badge](https://github.com/mheci/core/actions/workflows/build.yml/badge.svg)](https://github.com/mheci/core/actions/workflows/build.yml)
 
-See the [BlueBuild docs](https://blue-build.org/how-to/setup/) for quick setup instructions for setting up your own repository based on this template.
+Custom Bazzite-based OS image for development, AI workloads, and gaming.
 
-After setup, it is recommended you update this README to describe your custom image.
+Built with [BlueBuild](https://blue-build.org/).
+
+## Features
+
+- **Base**: [Bazzite-Nvidia-Open](https://bazzite.gg/) with open-source NVK driver support for NVIDIA GPUs
+- **Development**: VS Code, Zed Editor, Kitty terminal, opencode CLI
+- **AI**: LM Studio for running AI models locally
+- **Gaming**: Heroic Games Launcher, Lutris, UMU Launcher
+- **Browsing**: Zen Browser, Brave Browser
+- **Productivity**: LocalSend, PearPass, pcmanfm-qt file manager, KIO integration
+- **Performance**: NVIDIA shader cache (100GiB), QML disk cache, LAVD scheduler in performance mode
+- **SCX Schedulers**: LAVD configured for maximum performance
+- **Fonts**: Nerd Fonts (FiraCode, JetBrainsMono, Hack, Meslo, CascadiaCode), Google Fonts (Inter, Noto Sans Arabic, Ubuntu)
+- **Spell Checking**: English (US) and Arabic language packs
 
 ## Installation
 
-> [!WARNING]  
+> [!WARNING]
 > [This is an experimental feature](https://www.fedoraproject.org/wiki/Changes/OstreeNativeContainerStable), try at your own discretion.
 
 To rebase an existing atomic Fedora installation to the latest build:
 
-- First rebase to the unsigned image, to get the proper signing keys and policies installed:
-  ```
-  rpm-ostree rebase ostree-unverified-registry:ghcr.io/mheci/core:latest
-  ```
-- Reboot to complete the rebase:
-  ```
-  systemctl reboot
-  ```
-- Then rebase to the signed image, like so:
-  ```
-  rpm-ostree rebase ostree-image-signed:docker://ghcr.io/mheci/core:latest
-  ```
-- Reboot again to complete the installation
-  ```
-  systemctl reboot
-  ```
+```bash
+# First rebase to the unsigned image, to get the proper signing keys and policies installed
+rpm-ostree rebase ostree-unverified-registry:ghcr.io/mheci/core:latest
 
-The `latest` tag will automatically point to the latest build. That build will still always use the Fedora version specified in `recipe.yml`, so you won't get accidentally updated to the next major version.
+# Reboot to complete the rebase
+systemctl reboot
 
-## ISO
+# Then rebase to the signed image
+rpm-ostree rebase ostree-image-signed:docker://ghcr.io/mheci/core:latest
 
-If build on Fedora Atomic, you can generate an offline ISO with the instructions available [here](https://blue-build.org/how-to/generate-iso/#_top). These ISOs cannot unfortunately be distributed on GitHub for free due to large sizes, so for public projects something else has to be used for hosting.
+# Reboot again to complete the installation
+systemctl reboot
+```
+
+The `latest` tag will automatically point to the latest build.
 
 ## Verification
 
-These images are signed with [Sigstore](https://www.sigstore.dev/)'s [cosign](https://github.com/sigstore/cosign). You can verify the signature by downloading the `cosign.pub` file from this repo and running the following command:
+These images are signed with [Sigstore](https://www.sigstore.dev/)'s [cosign](https://github.com/sigstore/cosign). You can verify the signature by downloading the `cosign.pub` file from this repo and running:
 
 ```bash
 cosign verify --key cosign.pub ghcr.io/mheci/core
 ```
+
+## Custom Just Commands
+
+After installation, run `ujust` to see available commands:
+
+- `ujust update-all` - Update system and flatpaks
+- `ujust cleanup` - Prune old deployments and unused flatpaks
+- `ujust nvidia-info` - Display NVIDIA driver information
+- `ujust shader-cache-status` - Check NVIDIA shader cache settings
+- `ujust scx-status` - Check SCX scheduler status

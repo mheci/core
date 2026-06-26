@@ -1,3 +1,6 @@
 cosign.key
 cosign.private
 /Containerfile
+.DS_Store
+*.swp
+*.swo

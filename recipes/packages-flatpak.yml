@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/module-v1.json
+type: default-flatpaks
+configurations:
+  - notify: true
+    scope: system
+    repo:
+      url: https://flathub.org/repo/flathub.flatpakrepo
+      name: flathub
+      title: Flathub
+    install:
+      - ai.lmstudio.lm_studio
+      - app.zen_browser.zen
+      - com.heroicgameslauncher.hgl
+      - org.localsend.localsend_app
+      - io.github.Faugus.faugus-launcher
+      - net.lutris.Lutris
+      - org.gnome.Loupe
+    uninstall:
+      - org.mozilla.firefox
+  - scope: user

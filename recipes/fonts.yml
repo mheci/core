@@ -1,0 +1,21 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/module-v1.json
+type: fonts
+fonts:
+  nerd-fonts:
+    - FiraCode
+    - JetBrainsMono
+    - Hack
+    - SourceCodePro
+    - Terminus
+    - NerdFontsSymbolsOnly
+    - Meslo
+    - CascadiaCode
+  google-fonts:
+    - Inter
+    - Roboto
+    - Open Sans
+    - Noto Sans Arabic
+    - Noto Naskh Arabic
+    - Noto Sans
+    - Ubuntu

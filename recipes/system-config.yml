@@ -1,0 +1,63 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
+modules:
+  - type: script
+    snippets:
+      - |
+        LAVD_BIN=$(which scx_lavd 2>/dev/null || find /usr/libexec /usr/lib /usr/bin -name "scx_lavd" 2>/dev/null | head -1)
+        if [ -n "$LAVD_BIN" ]; then
+          mkdir -p /etc/systemd/system/scx_lavd.service.d
+          printf '[Service]\nExecStart=\nExecStart=%s --performance\n' "$LAVD_BIN" > /etc/systemd/system/scx_lavd.service.d/performance.conf
+        fi
+
+  - type: script
+    snippets:
+      - |
+        cat > /etc/profile.d/nvidia-config.sh << 'EOS'
+        export QML_FORCE_DISK_CACHE=1
+        export __GL_SHADER_DISK_CACHE_SKIP_CLEANUP=1
+        export __GL_SHADER_DISK_CACHE_SIZE=107374182400
+        EOS
+        chmod +x /etc/profile.d/nvidia-config.sh
+        echo "QML_FORCE_DISK_CACHE=1" >> /etc/environment
+        echo "__GL_SHADER_DISK_CACHE_SKIP_CLEANUP=1" >> /etc/environment
+        echo "__GL_SHADER_DISK_CACHE_SIZE=107374182400" >> /etc/environment
+
+  - type: script
+    snippets:
+      - |
+        mkdir -p /usr/share/ublue-os/justfiles
+        cat > /usr/share/ublue-os/justfiles/60-custom.just << 'EOS'
+        update-all:
+            sudo bootc update
+            flatpak update -y
+        cleanup:
+            sudo bootc prune
+            flatpak uninstall --unused -y
+            sudo journalctl --vacuum-time=3d
+        nvidia-info:
+            nvidia-smi
+            cat /proc/driver/nvidia/version
+        shader-cache-status:
+            echo "QML_FORCE_DISK_CACHE=\$$QML_FORCE_DISK_CACHE"
+            echo "__GL_SHADER_DISK_CACHE_SIZE=\$$__GL_SHADER_DISK_CACHE_SIZE"
+        scx-status:
+            systemctl status scx_lavd --no-pager 2>/dev/null || echo "scx_lavd not running"
+        EOS
+
+  - type: script
+    scripts:
+      - install-custom.sh
+
+  - type: kargs
+    kargs:
+      - nvidia_drm.fbdev=1
+      - nvidia.NVreg_EnableGpuFirmware=0
+      - nvidia.NVreg_UsePageAttributeTable=1
+      - nvidia.NVreg_EnablePCIeGen3=1
+      - nvidia.NVreg_RegistryDwords="PowerMizerEnable=0x1;PerfLevelSrc=0x2222;PowerMizerLevel=0x1;PowerMizerLevelAC=0x1"
+
+  - type: systemd
+    system:
+      enabled:
+        - scx_lavd
