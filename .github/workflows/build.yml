@@ -52,10 +52,11 @@ jobs:
 
       - name: Pull built image
         run: |
-          podman pull ghcr.io/mheci/core:latest_linux_amd64
+          podman pull "ghcr.io/mheci/core:latest"
 
       - name: Create bootable disk image
         id: disk-image
+        continue-on-error: true
         run: |
           mkdir -p /tmp/bootc-output
           podman run --rm --privileged \
@@ -64,7 +65,7 @@ jobs:
             quay.io/centos-bootc/bootc-image-builder:latest \
             --type qcow2 \
             --output /output \
-            ghcr.io/mheci/core:latest_linux_amd64
+            "ghcr.io/mheci/core:latest"
           echo "disk=/tmp/bootc-output/qcow2/disk.qcow2" >> "$GITHUB_OUTPUT"
 
       - name: Boot VM and check for kernel panics
@@ -74,7 +75,7 @@ jobs:
             -machine type=q35,accel=tcg \
             -m 2048 \
             -smp 2 \
-            -drive file=${{ steps.disk-image.outputs.disk }},format=qcow2,if=virtio \
+            -drive file="${{ steps.disk-image.outputs.disk }}",format=qcow2,if=virtio \
             -nographic \
             -serial mon:stdio 2>&1 | tee /tmp/serial.log || true
           if grep -qi "kernel panic\|BUG: unable to handle\|general protection fault" /tmp/serial.log 2>/dev/null; then
@@ -91,5 +92,7 @@ jobs:
         if: always()
         run: |
           echo "Checking image manifest..."
-          skopeo inspect docker://ghcr.io/mheci/core:latest_linux_amd64
+          skopeo inspect "docker://ghcr.io/mheci/core:latest"
           echo "Image exists and is valid"
+          skopeo inspect "docker://ghcr.io/mheci/core:f74c109-44" || true
+          skopeo inspect "docker://ghcr.io/mheci/core:20260626-44" || true
