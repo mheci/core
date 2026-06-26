@@ -13,6 +13,7 @@ modules:
         - https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
         - https://packages.microsoft.com/keys/microsoft.asc
     install:
+      skip-unavailable: true
       packages:
         - brave-browser
         - code
@@ -21,18 +22,10 @@ modules:
         - pcmanfm-qt
         - gvfs-mtp
         - gvfs-gphoto2
-        - kio-fuse
-        - kio-extras
-        - ffmpegthumbs
-        - kimageformats
-        - kimageformats-raw
-        - raw-thumbnailer
+        - kf6-kimageformats
         - tumbler
-        - tumbler-plugins-extra
-        - hunspell
-        - hunspell-en-US
+        - tumbler-extras
         - hunspell-ar
-        - scx-scheds
     remove:
       packages:
         - firefox
