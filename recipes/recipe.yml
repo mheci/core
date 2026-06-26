@@ -10,9 +10,5 @@ modules:
   - from-file: packages-rpm.yml
   - from-file: packages-flatpak.yml
   - from-file: fonts.yml
-  - type: files
-    files:
-      - source: system
-        destination: /
   - from-file: system-config.yml
   - type: signing
