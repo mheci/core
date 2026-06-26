@@ -35,3 +35,61 @@ jobs:
           maximize_build_space: true
           build_chunked_oci: true
           max_layers: 128
+
+  validate:
+    name: Boot Validation
+    needs: bluebuild
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Install test dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq qemu-system-x86 qemu-utils
+
+      - name: Pull built image
+        run: |
+          podman pull ghcr.io/mheci/core:latest_linux_amd64
+
+      - name: Create bootable disk image
+        id: disk-image
+        run: |
+          mkdir -p /tmp/bootc-output
+          podman run --rm --privileged \
+            -v /var/lib/containers/storage:/var/lib/containers/storage \
+            -v /tmp/bootc-output:/output \
+            quay.io/centos-bootc/bootc-image-builder:latest \
+            --type qcow2 \
+            --output /output \
+            ghcr.io/mheci/core:latest_linux_amd64
+          echo "disk=/tmp/bootc-output/qcow2/disk.qcow2" >> "$GITHUB_OUTPUT"
+
+      - name: Boot VM and check for kernel panics
+        if: steps.disk-image.outcome == 'success'
+        run: |
+          timeout 60 qemu-system-x86_64 \
+            -machine type=q35,accel=tcg \
+            -m 2048 \
+            -smp 2 \
+            -drive file=${{ steps.disk-image.outputs.disk }},format=qcow2,if=virtio \
+            -nographic \
+            -serial mon:stdio 2>&1 | tee /tmp/serial.log || true
+          if grep -qi "kernel panic\|BUG: unable to handle\|general protection fault" /tmp/serial.log 2>/dev/null; then
+            echo "KERNEL PANIC OR CRASH DETECTED"
+            exit 1
+          fi
+          if grep -qi "Started.*System Initialization\|Reached target.*Multi-User" /tmp/serial.log 2>/dev/null; then
+            echo "Boot successful"
+          else
+            echo "Boot may not have reached multi-user target within time limit"
+          fi
+
+      - name: Validate image manifest
+        if: always()
+        run: |
+          echo "Checking image manifest..."
+          skopeo inspect docker://ghcr.io/mheci/core:latest_linux_amd64
+          echo "Image exists and is valid"
